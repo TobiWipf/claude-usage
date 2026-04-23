@@ -11,6 +11,7 @@ import subprocess
 import sys
 
 RESET = "\033[0m"
+BOLD = "\033[1m"
 
 
 def _fg(r: int, g: int, b: int) -> str:
@@ -129,8 +130,9 @@ def read_effort(cwd: str) -> str:
     return ""
 
 
-def paint(color: str, text: str) -> str:
-    return f"{color}{text}{RESET}" if color else text
+def paint(color, text, bold=False):
+    prefix = (BOLD if bold else "") + (color or "")
+    return f"{prefix}{text}{RESET}" if prefix else text
 
 
 def main() -> None:
@@ -164,19 +166,21 @@ def main() -> None:
     sep = f" {paint(theme['sep'], '|')} "
     parts = []
     if branch:
-        seg = paint(theme["branch"], branch)
+        seg = paint(theme["branch"], branch, bold=True)
         if is_worktree:
-            seg += " " + paint(theme["worktree"], "(worktree)")
+            seg += " " + paint(theme["worktree"], "(worktree)", bold=True)
         parts.append(seg)
     elif is_worktree:
-        parts.append(paint(theme["worktree"], "(worktree)"))
-    parts.append(paint(theme["model"], model))
+        parts.append(paint(theme["worktree"], "(worktree)", bold=True))
+    parts.append(paint(theme["model"], model, bold=True))
     if effort:
         parts.append(
-            paint(theme["label"], "effort:") + paint(theme["effort"], effort)
+            paint(theme["label"], "effort:")
+            + paint(theme["effort"], effort, bold=True)
         )
     parts.append(
-        paint(theme["label"], "ctx:") + paint(ctx_color(theme, pct_int), pct_str)
+        paint(theme["label"], "ctx:")
+        + paint(ctx_color(theme, pct_int), pct_str, bold=True)
     )
 
     print(sep.join(parts), end="")
